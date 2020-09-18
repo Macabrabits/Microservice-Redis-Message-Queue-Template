@@ -70,6 +70,7 @@ const pub = (channel: string, msg: any) =>
 
 const rpush = (key: string, msg: any) =>
   new Promise((resolve, reject) => {
+    msg = JSON.stringify(msg)
     redisClient.rpush(key, msg, (err, qtdClients: number) => {
       if (err) reject(err);
       resolve(qtdClients);
@@ -92,19 +93,27 @@ const brpop = (key: string, index: number) =>
     });
   });
 
-const message = (subscriber, data) =>
+const message = (channel: string, data: any) =>
   new Promise((resolve, reject) => {
-    const messageId = uuidv4()
-    data = JSON.stringify(data);
-    rpush(messageId, data).then(() => pub('ms', messageId));
+    const messageId = uuidv4()    
+    const recursiveRpop = (messageId) => RedisCli.rpop(messageId).then(data => (data == null ? recursiveRpop(messageId) : data));
+    rpush(messageId, data)
+      .then(() => pub(channel, messageId))
+      .then(() => recursiveRpop(`res:${messageId}`))
+      .then(res => {
+        res = JSON.parse(res);        
+        if (res.status >= 300) reject(res.data);
+        resolve(res.data);
+      });
+    
 
-    subscriber.on('message', (channel, message) => {
-      RedisCli.rpop(messageId).then(res => {
-        console.log(channel, message, res);        
-        resolve(res);
-      })
+    // subscriber.on('message', (channel, message) => {
+    //   RedisCli.rpop(messageId).then(res => {
+    //     console.log(channel, message, res);        
+    //     resolve(res);
+    //   })
       
-    });
+    // });
 
     setTimeout(() => reject('timeout'), 1000);
   });

@@ -5,25 +5,23 @@ import { createConnection } from 'typeorm';
 const redis = require('redis');
 import config from './config/redis';
 import { RedisCli } from './utilities/RedisCli';
+import Controler from './utilities/controller'
 
-const double = (messageId) =>
-  new Promise((resolve, reject) => {
-    RedisCli.rpop(messageId).then((data: any) => {
-      data = JSON.parse(data);
-      RedisCli.rpush(messageId, data.count * 2).then(() => RedisCli.pub('main', messageId));
 
-      resolve(data);
-    });
-  });
+import routes from './routes';
 
 createConnection()
   .then(connection => {
     const subscriber = redis.createClient(config);
 
-    subscriber.on('message', function (channel, message) {
-      console.log(channel, message);
-
-      double(message).then(data => console.log(data));
+    subscriber.on('message', function (channel, messageId: string) {
+      RedisCli.rpop(messageId).then((data: string) => {
+        console.log(data);
+        const message = JSON.parse(data);                
+        const service = routes[message.url][message.method];
+        Controler(RedisCli, service, message, messageId)
+                        
+      });
     });
 
     subscriber.subscribe('ms');

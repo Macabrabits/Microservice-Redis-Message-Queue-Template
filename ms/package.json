@@ -28,7 +28,7 @@
     "typeorm": "^0.2.25"
   },
   "scripts": {
-    "start": "ts-node-dev --respawn --transpile-only --ignore-watch node_modules src/index.ts",
+    "start": "ts-node-dev --poll --respawn --transpile-only --ignore-watch node_modules src/index.ts",
     "test": "env ENVIRONMENT=test jest",
     "test_fresh": "env ENVIRONMENT=test jest --clearCache"
   }
