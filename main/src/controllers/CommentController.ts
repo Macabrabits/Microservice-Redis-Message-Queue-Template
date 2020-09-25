@@ -1,12 +1,7 @@
 import { Request, Response } from 'express';
-import { CommentService } from '../services/CommentService';
+import CommentService from '../services/ExampleService';
 import { controller } from './index';
 
-const create = async (req: Request, res: Response): Promise<Response> => controller(req, res, CommentService.save);
+const double = async (req: Request, res: Response): Promise<Response> => controller(req, res, CommentService.double);
 
-const update = async (req: Request, res: Response): Promise<Response> => controller(req, res, CommentService.save);
-
-export const CommentController = {  
-  create,
-  update,  
-};
+export default { double };

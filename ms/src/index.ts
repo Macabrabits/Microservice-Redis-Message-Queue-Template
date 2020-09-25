@@ -5,8 +5,7 @@ import { createConnection } from 'typeorm';
 const redis = require('redis');
 import config from './config/redis';
 import { RedisCli } from './utilities/RedisCli';
-import Controler from './utilities/controller'
-
+import Controler from './utilities/controller';
 
 import routes from './routes';
 
@@ -17,10 +16,21 @@ createConnection()
     subscriber.on('message', function (channel, messageId: string) {
       RedisCli.rpop(messageId).then((data: string) => {
         console.log(data);
-        const message = JSON.parse(data);                
-        const service = routes[message.url][message.method];
-        Controler(RedisCli, service, message, messageId)
-                        
+        const message = JSON.parse(data);
+        const url = routes[message.url];
+        if (url == null) {
+          RedisCli.rpush(`res:${messageId}`, { status: 400, data: { errors: ['Url inexistente'] } });
+          return
+        }
+
+        const service = routes[message.url][message.method];        
+
+        if (service == null) {
+          RedisCli.rpush(`res:${messageId}`, { status: 400, data: { errors: ['Metodo inexistente'] } });
+          return
+        }
+
+        Controler(RedisCli, service, message, messageId);
       });
     });
 

@@ -93,7 +93,15 @@ const brpop = (key: string, index: number) =>
     });
   });
 
-const message = (channel: string, data: any) =>
+interface config {
+  url: string,
+  method: string,
+  data?: any,
+  params?: any,
+  headers?: object,
+}
+
+const message = (channel: string, data: config) =>  
   new Promise((resolve, reject) => {
     const messageId = uuidv4()    
     const recursiveRpop = (messageId) => RedisCli.rpop(messageId).then(data => (data == null ? recursiveRpop(messageId) : data));

@@ -1,4 +1,5 @@
-const double = async (data: { count: number }) => {
+const double = async (req: any) => {
+  const data = req.data
 
   if(!data.count) throw ['campo count é obrigatório']
 
