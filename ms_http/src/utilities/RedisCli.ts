@@ -122,7 +122,7 @@ const message = (channel: string, data: config) =>
     //   })      
     // });
 
-    setTimeout(() => reject('timeout'), 2000);
+    setTimeout(() => reject('timeout'), 1000);
   });
 
 const newSubscriber = (channel: string) => {

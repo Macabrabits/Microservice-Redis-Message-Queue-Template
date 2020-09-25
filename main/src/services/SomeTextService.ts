@@ -7,6 +7,7 @@ const index = async (req: any) => {
     method: `get`,
     params: data,
   };
+  console.log('redis')
 
   return RedisCli.message('ms', config); 
 }
